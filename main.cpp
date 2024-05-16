@@ -11,18 +11,16 @@ int main()
     //setlocale(LC_ALL, "Rus");
     //auto converter = NumToTxt();
     int number;
-    //std::string text;
-    int stop{ 1 };
-    while (stop)
+    char input{ 'y' };
+    while (input != 'n')
     {
         std::cout << "\nВведите число: ";
         std::cin >> number;
-        number = 713567;
-        //text = NumToTxt(number);
-        std::cout << NumToTxt(number) << '\n';
-        std::cout << "Что-бы закончить введите 0: ";
-        std::cin >> stop;
-        //stop = std::getchar();
+        std::cout << '\t' << NumToTxt(number) << '\n';
+        std::cout << "Чтобы закончить введите n: ";
+        std::cin >> input;
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     };
     return 0;
 }

@@ -4,19 +4,6 @@
 
 constexpr uint maxSize{ 9 };
 
-const WordGender digitsGender [maxSize]
-    {
-        Male,
-        Male,
-        Male,
-        Female,
-        Male,
-        Male,
-        Male,
-        Male,
-        Male
-    };
-
 const uint nameVariantByOne [10]
 {
     2,
@@ -31,85 +18,77 @@ const uint nameVariantByOne [10]
     2
 };
 
+const char** defaultMask [maxSize]
+{
+    oneMaleWords,
+    tenMaleWords,
+    hundredMaleWords,
+    oneFemaleWords,
+    tenMaleWords,
+    hundredMaleWords,
+    oneMaleWords,
+    tenMaleWords,
+    hundredMaleWords
+};
+
 std::string NumToTxt(int number)
 {
     Digit digits [maxSize]
     {
-        {0, 0, 0},
-        {0, 0, 1},
-        {0, 0, 2},
-        {0, 1, 0},
-        {0, 1, 1},
-        {0, 1, 2},
-        {0, 2, 0},
-        {0, 2, 1},
-        {0, 2, 2}
+        {0, 0, 0, defaultMask[0]},
+        {0, 0, 1, defaultMask[1]},
+        {0, 0, 2, defaultMask[2]},
+        {0, 1, 0, defaultMask[3]},
+        {0, 1, 1, defaultMask[4]},
+        {0, 1, 2, defaultMask[5]},
+        {0, 2, 0, defaultMask[6]},
+        {0, 2, 1, defaultMask[7]},
+        {0, 2, 2, defaultMask[8]}
     };
 
-    bool numberIsNegative{ number < 0 };
-    number = std::abs(number);
+    bool isNegative{ number < 0 };
+    bool isNull{ !number };
     uint size{ getDigitsCount(number) + !number };
-
-    for (int i = 0, tmpNumber = number; tmpNumber != 0; ++i)
+    int tmpNumber = std::abs(number);
+    for (uint i = 0; tmpNumber != 0; ++i)
     {
         if( i >= maxSize )
         {
             return "Число слишком большое";
         }
         digits[i].value = tmpNumber % 10;
-        tmpNumber /= 10;
-    }
-
-    for (uint i = 0; i < size; ++i)
-    {
+        digits[i].isVisible = digits[i].value;
         if( digits[i].isTeen() )
         {
+            digits[i-1].mask = teenMaleWords;
             digits[i-1].order = 3;
-            digits[i-1].mask = getMask(i-1, digits[i-1]);
-            digits[i-1].isHidden = false;
+            digits[i-1].isVisible = true;
+            digits[i].isVisible = false;
         }
-        else
-        {
-            digits[i].mask = getMask(i, digits[i]);
-            digits[i].setHidden();
-        }
+        tmpNumber /= 10;
     }
-    if( !number )
-    {
-        digits[0].isHidden = false;
-    }
+    digits[0].isVisible += isNull;
 
     std::stringstream stream;
-    stream << sign [numberIsNegative];
-    for (int sector = biggestFilledSector(size); sector >= 0; --sector)
+    stream << sign[isNegative];
+    for (int i = size-1; i >= 0; --i)
     {
-        if( sectorIsHidden( &digits [sector*3] ) )
+        if( digits[i].isVisible )
         {
-            continue;
+            stream << digits[i].toChar() << ' ';
         }
-        for (int order = 2; order >= 0; --order)
+        if( needAddSectorName(&digits[i]) )
         {
-            Digit& digit{ digits [id(sector, order)] };
-            if( !digit.isHidden )
-            {
-                stream << digit.toChar() << ' ';
-            }
+            stream << getSectorName(digits[i]) << ' ';
         }
-        stream << getSectorName( digits [sector*3] ) << ' ';
     }
 
-    std::string text{ stream.str() };
-    return text;
-}
-
-uint id(uint sector, uint order)
-{
-    return sector*3 + order;
+    return stream.str();
 }
 
 uint getDigitsCount(int number)
 {
-    return static_cast<uint>(std::ceil(std::log10(number + 1)));
+    return static_cast<uint>(std::ceil(std::log10(std::abs(number) + 1)));
 }
 
 bool Digit::isTeen()
@@ -117,31 +96,9 @@ bool Digit::isTeen()
     return value == 1 && order == 1;
 }
 
-void Digit::setHidden()
-{
-    if( !mask )
-    {
-        isHidden = true;
-    }
-    else
-    {
-        isHidden = value == 0;
-    }
-}
-
 const char *Digit::toChar()
 {
-    return (isHidden ? nullptr : *(mask + value));
-}
-
-const char **getMask(uint id, const Digit& digit)
-{
-    return *(digitsWords + digitsGender[id]*4 + digit.order);
-}
-
-uint biggestFilledSector(uint size)
-{
-    return std::ceil( size/3.0 ) - 1;
+    return *(mask + value);
 }
 
 const char *getSectorName(const Digit &one)
@@ -154,11 +111,29 @@ const char *getSectorName(const Digit &one)
     return *(nameMask + nameVariantByOne[one.value]);
 }
 
-bool sectorIsHidden(const Digit* one)
+bool needAddSectorName(const Digit *one)
 {
+    if( one->order && one->order<3 )
+    {
+        return false;
+    }
     const Digit* ten{ one+1 };
     const Digit* hundred{ one+2 };
-    return one->isHidden + ten->isHidden + hundred->isHidden == 3 && one->sector != 0;
+    return one->isVisible + ten->isVisible + hundred->isVisible;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

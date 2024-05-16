@@ -13,26 +13,15 @@ struct Digit
     uint sector {0};
     uint order {0};
     const char** mask {nullptr};
-    bool isHidden {true};
+    bool isVisible {false};
     bool isTeen();
-    void setHidden();
     const char* toChar();
-};
-
-enum WordGender
-{
-    Male = 0,
-    Female = 1
 };
 
 std::string NumToTxt(int number);
 
-uint id(uint sector, uint order);
 uint getDigitsCount(int number);
-const char** getMask(uint id, const Digit& digit);
 const char* getSectorName(const Digit& one);
-bool sectorIsHidden(const Digit* one);
-
-uint biggestFilledSector(uint size);
+bool needAddSectorName(const Digit* digit);
 
 #endif // CONVERTER_FUNCTION_H
