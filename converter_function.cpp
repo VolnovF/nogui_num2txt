@@ -57,23 +57,23 @@ std::string NumToTxt(int number)
             return "Число слишком большое";
         }
         digits[i].value = tmpNumber % 10;
-        digits[i].isVisible = digits[i].value;
+        digits[i].visibility = digits[i].value;
         if( digits[i].isTeen() )
         {
             digits[i-1].mask = teenMaleWords;
             digits[i-1].order = 3;
-            digits[i-1].isVisible = true;
-            digits[i].isVisible = false;
+            digits[i-1].visibility = true;
+            digits[i].visibility = false;
         }
         tmpNumber /= 10;
     }
-    digits[0].isVisible += isNull;
+    digits[0].visibility += isNull;
 
     std::stringstream stream;
     stream << sign[isNegative];
     for (int i = size-1; i >= 0; --i)
     {
-        if( digits[i].isVisible )
+        if( digits[i].visibility )
         {
             stream << digits[i].toChar() << ' ';
         }
@@ -103,7 +103,7 @@ const char *Digit::toChar()
 
 const char *getSectorName(const Digit &one)
 {
-    const char** nameMask{ *(sectorsNames + one.sector) };
+    const char** nameMask{ *(sectorsNames + one.rank) };
     if( one.order > 0 )
     {
         return nameMask[2];
@@ -119,7 +119,7 @@ bool needAddSectorName(const Digit *one)
     }
     const Digit* ten{ one+1 };
     const Digit* hundred{ one+2 };
-    return one->isVisible + ten->isVisible + hundred->isVisible;
+    return one->visibility + ten->visibility + hundred->visibility;
 }
 
 

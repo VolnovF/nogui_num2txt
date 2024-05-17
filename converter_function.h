@@ -10,10 +10,10 @@ using uint = unsigned int;
 struct Digit
 {
     uint value {0};
-    uint sector {0};
+    uint rank {0};
     uint order {0};
     const char** mask {nullptr};
-    bool isVisible {false};
+    bool visibility {false};
     bool isTeen();
     const char* toChar();
 };
