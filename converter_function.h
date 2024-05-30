@@ -22,8 +22,8 @@ std::string numToTxt(const int number);
 uint getDigitsCount(int number);
 bool isTeen(const uint digit, const Order order);
 const char* toChar(const uint digit, const char** mask);
-bool needAddSectorName(const Order order, const uint posInNumber, const std::bitset<maxSize>& visibility);
-const char* getSectorName(const uint digit, const uint posInNumber, const Order order);
+bool needTripletName(const Order order, const uint posInNumber, const std::bitset<maxSize>& visibility);
+const char* getTripletName(const uint digit, const uint posInNumber, const Order order);
 uint tripletNumber(const uint posInNumber);
 
 #endif // CONVERTER_FUNCTION_H

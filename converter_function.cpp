@@ -63,9 +63,9 @@ std::string numToTxt(const int number)
         {
             stream << toChar(digits[i], masks[i]) << ' ';
         }
-        if( needAddSectorName(orders[i], i, visibility) )
+        if( needTripletName(orders[i], i, visibility) )
         {
-            stream << getSectorName(digits[i], i, orders[i]) << ' ';
+            stream << getTripletName(digits[i], i, orders[i]) << ' ';
         }
     }
 
@@ -87,7 +87,7 @@ const char* toChar(const uint digit, const char** mask)
     return *(mask + digit);
 }
 
-bool needAddSectorName(const Order order, const uint posInNumber, const std::bitset<maxSize>& visibility)
+bool needTripletName(const Order order, const uint posInNumber, const std::bitset<maxSize>& visibility)
 {
     if( order && order != teen )
     {
@@ -96,7 +96,7 @@ bool needAddSectorName(const Order order, const uint posInNumber, const std::bit
     return visibility[posInNumber] || visibility[posInNumber+1] || visibility[posInNumber+2];
 }
 
-const char* getSectorName(const uint digit, const uint posInNumber, const Order order)
+const char* getTripletName(const uint digit, const uint posInNumber, const Order order)
 {
     static const uint tripletNameByDigit[10]
     {
