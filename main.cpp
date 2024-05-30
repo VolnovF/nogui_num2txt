@@ -12,12 +12,12 @@ int main()
     //auto converter = NumToTxt();
     int number;
     char input{'y'};
-    while (input != 'n')
+    while (input != 'e')
     {
         std::cout << "\nВведите число: ";
         std::cin >> number;
         std::cout << numToTxt(number) << '\n';
-        std::cout << "Чтобы закончить введите n: ";
+        std::cout << "Чтобы выйти введите 'e': ";
         std::cin >> input;
         std::cin.clear();
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
