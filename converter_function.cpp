@@ -4,21 +4,7 @@
 
 constexpr uint maxSize{ 9 };
 
-const uint nameVariantByOne [10]
-{
-    2,
-    0,
-    1,
-    1,
-    1,
-    2,
-    2,
-    2,
-    2,
-    2
-};
-
-const char** defaultMask [maxSize]
+/*const char** defaultMask [maxSize]
 {
     oneMaleWords,
     tenMaleWords,
@@ -29,21 +15,21 @@ const char** defaultMask [maxSize]
     oneMaleWords,
     tenMaleWords,
     hundredMaleWords
-};
+};*/
 
 std::string NumToTxt(int number)
 {
     Digit digits [maxSize]
     {
-        {0, 0, 0, defaultMask[0]},
-        {0, 0, 1, defaultMask[1]},
-        {0, 0, 2, defaultMask[2]},
-        {0, 1, 0, defaultMask[3]},
-        {0, 1, 1, defaultMask[4]},
-        {0, 1, 2, defaultMask[5]},
-        {0, 2, 0, defaultMask[6]},
-        {0, 2, 1, defaultMask[7]},
-        {0, 2, 2, defaultMask[8]}
+        {0, ones, one, oneMaleWords},
+        {0, ones, ten, tenMaleWords},
+        {0, ones, hundred, hundredMaleWords},
+        {0, thousands, one, oneFemaleWords},
+        {0, thousands, ten, tenMaleWords},
+        {0, thousands, hundred, hundredMaleWords},
+        {0, millions, one, oneMaleWords},
+        {0, millions, ten, tenMaleWords},
+        {0, millions, hundred, hundredMaleWords}
     };
 
     bool isNegative{ number < 0 };
@@ -61,7 +47,7 @@ std::string NumToTxt(int number)
         if( digits[i].isTeen() )
         {
             digits[i-1].mask = teenMaleWords;
-            digits[i-1].order = 3;
+            digits[i-1].order = teen;
             digits[i-1].visibility = true;
             digits[i].visibility = false;
         }
@@ -93,7 +79,7 @@ uint getDigitsCount(int number)
 
 bool Digit::isTeen()
 {
-    return value == 1 && order == 1;
+    return value == 1 && order == ten;
 }
 
 const char *Digit::toChar()
@@ -101,25 +87,38 @@ const char *Digit::toChar()
     return *(mask + value);
 }
 
-const char *getSectorName(const Digit &one)
+const char *getSectorName(const Digit &digit)
 {
-    const char** nameMask{ *(sectorsNames + one.rank) };
-    if( one.order > 0 )
+    static const uint nameVariantByOne [10]
+        {
+            2,
+            0,
+            1,
+            1,
+            1,
+            2,
+            2,
+            2,
+            2,
+            2
+        };
+    const char** nameMask{ *(sectorsNames + digit.rank) };
+    if( digit.order > one )
     {
         return nameMask[2];
     }
-    return *(nameMask + nameVariantByOne[one.value]);
+    return *(nameMask + nameVariantByOne[digit.value]);
 }
 
-bool needAddSectorName(const Digit *one)
+bool needAddSectorName(const Digit *digit)
 {
-    if( one->order && one->order<3 )
+    if( digit->order && digit->order < teen )
     {
         return false;
     }
-    const Digit* ten{ one+1 };
-    const Digit* hundred{ one+2 };
-    return one->visibility + ten->visibility + hundred->visibility;
+    const Digit* ten{ digit+1 };
+    const Digit* hundred{ digit+2 };
+    return digit->visibility + ten->visibility + hundred->visibility;
 }
 
 

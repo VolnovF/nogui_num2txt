@@ -7,13 +7,27 @@
 
 using uint = unsigned int;
 
+enum Rank {
+    ones,
+    thousands,
+    millions
+};
+
+enum Order {
+    one,
+    ten,
+    hundred,
+    teen
+};
+
 struct Digit
 {
     uint value {0};
-    uint rank {0};
-    uint order {0};
+    Rank rank;
+    Order order;
     const char** mask {nullptr};
     bool visibility {false};
+
     bool isTeen();
     const char* toChar();
 };
@@ -21,7 +35,7 @@ struct Digit
 std::string NumToTxt(int number);
 
 uint getDigitsCount(int number);
-const char* getSectorName(const Digit& one);
+const char* getSectorName(const Digit& digit);
 bool needAddSectorName(const Digit* digit);
 
 #endif // CONVERTER_FUNCTION_H
