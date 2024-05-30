@@ -10,6 +10,12 @@ using uint = unsigned int;
 
 constexpr uint maxSize{ 9 };
 
+enum Rank {
+    ones,
+    thousands,
+    millions
+};
+
 enum Order {
     one,
     ten,
@@ -17,13 +23,13 @@ enum Order {
     teen
 };
 
-std::string numToTxt(const int number);
+std::string NumToTxt(const int number);
 
 uint getDigitsCount(int number);
 bool isTeen(const uint digit, const Order order);
 const char* toChar(const uint digit, const char** mask);
 bool needAddSectorName(const Order order, const uint posInNumber, const std::bitset<maxSize>& visibility);
 const char* getSectorName(const uint digit, const uint posInNumber, const Order order);
-uint tripletNumber(const uint posInNumber);
+uint getTripletNumber(const uint digit);
 
 #endif // CONVERTER_FUNCTION_H

@@ -2,70 +2,70 @@
 
 #include "words.h"
 
-constexpr uint maxSize{ 9 };
-
-/*const char** defaultMask [maxSize]
+std::string numToTxt(const int number)
 {
-    oneMaleWords,
-    tenMaleWords,
-    hundredMaleWords,
-    oneFemaleWords,
-    tenMaleWords,
-    hundredMaleWords,
-    oneMaleWords,
-    tenMaleWords,
-    hundredMaleWords
-};*/
-
-std::string NumToTxt(int number)
-{
-    Digit digits [maxSize]
+    uint digits[maxSize] {0};
+    Order orders[maxSize]
     {
-        {0, ones, one, oneMaleWords},
-        {0, ones, ten, tenMaleWords},
-        {0, ones, hundred, hundredMaleWords},
-        {0, thousands, one, oneFemaleWords},
-        {0, thousands, ten, tenMaleWords},
-        {0, thousands, hundred, hundredMaleWords},
-        {0, millions, one, oneMaleWords},
-        {0, millions, ten, tenMaleWords},
-        {0, millions, hundred, hundredMaleWords}
+        one,
+        ten,
+        hundred,
+        one,
+        ten,
+        hundred,
+        one,
+        ten,
+        hundred
     };
-
+    const char** masks[maxSize]
+    {
+        oneMaleWords,
+        tenMaleWords,
+        hundredMaleWords,
+        oneFemaleWords,
+        tenMaleWords,
+        hundredMaleWords,
+        oneMaleWords,
+        tenMaleWords,
+        hundredMaleWords
+    };
+    std::bitset<maxSize> visibility;
     bool isNegative{ number < 0 };
     bool isNull{ !number };
+
     uint size{ getDigitsCount(number) + !number };
+    if( size > maxSize )
+    {
+        return "Число слишком большое";
+    }
+
     int tmpNumber = std::abs(number);
     for (uint i = 0; tmpNumber != 0; ++i)
     {
-        if( i >= maxSize )
+        digits[i] = tmpNumber % 10;
+        visibility[i] = digits[i];
+        if( isTeen(digits[i], orders[i]) )
         {
-            return "Число слишком большое";
-        }
-        digits[i].value = tmpNumber % 10;
-        digits[i].visibility = digits[i].value;
-        if( digits[i].isTeen() )
-        {
-            digits[i-1].mask = teenMaleWords;
-            digits[i-1].order = teen;
-            digits[i-1].visibility = true;
-            digits[i].visibility = false;
+            masks[i-1] = teenMaleWords;
+            orders[i-1] = teen;
+            visibility[i-1] = true;
+            visibility[i] = false;
         }
         tmpNumber /= 10;
     }
-    digits[0].visibility += isNull;
+    visibility[0] = visibility[0] || isNull;
 
     std::stringstream stream;
     stream << sign[isNegative];
     for (int i = size-1; i >= 0; --i)
     {
-        if( digits[i].visibility )
+        if( visibility[i] )
         {
-            stream << digits[i].toChar() << ' ';
+            stream << toChar(digits[i], masks[i]) << ' ';
         }
-        if( needAddSectorName(&digits[i]) )
+        if( needAddSectorName(orders[i], i, visibility) )
         {
-            stream << getSectorName(digits[i]) << ' ';
+            stream << getSectorName(digits[i], i, orders[i]) << ' ';
         }
     }
 
@@ -77,62 +77,49 @@ uint getDigitsCount(int number)
     return static_cast<uint>(std::ceil(std::log10(std::abs(number) + 1)));
 }
 
-bool Digit::isTeen()
+bool isTeen(const uint digit, const Order order)
 {
-    return value == 1 && order == ten;
+    return digit == 1 && order == ten;
 }
 
-const char *Digit::toChar()
+const char* toChar(const uint digit, const char** mask)
 {
-    return *(mask + value);
+    return *(mask + digit);
 }
 
-const char *getSectorName(const Digit &digit)
+bool needAddSectorName(const Order order, const uint posInNumber, const std::bitset<maxSize>& visibility)
 {
-    static const uint nameVariantByOne [10]
-        {
-            2,
-            0,
-            1,
-            1,
-            1,
-            2,
-            2,
-            2,
-            2,
-            2
-        };
-    const char** nameMask{ *(sectorsNames + digit.rank) };
-    if( digit.order > one )
-    {
-        return nameMask[2];
-    }
-    return *(nameMask + nameVariantByOne[digit.value]);
-}
-
-bool needAddSectorName(const Digit *digit)
-{
-    if( digit->order && digit->order < teen )
+    if( order && order != teen )
     {
         return false;
     }
-    const Digit* ten{ digit+1 };
-    const Digit* hundred{ digit+2 };
-    return digit->visibility + ten->visibility + hundred->visibility;
+    return visibility[posInNumber] || visibility[posInNumber+1] || visibility[posInNumber+2];
 }
 
+const char* getSectorName(const uint digit, const uint posInNumber, const Order order)
+{
+    static const uint tripletNameByDigit[10]
+    {
+        2,
+        0,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+    };
+    const char** nameMask{ *(tripletNames + tripletNumber(posInNumber)) };
+    if( order )
+    {
+        return nameMask[2];
+    }
+    return *(nameMask + tripletNameByDigit[digit]);
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+uint tripletNumber(const uint posInNumber)
+{
+    return static_cast<uint>(posInNumber/3);
+}

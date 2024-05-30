@@ -73,7 +73,7 @@ const char* oneFemaleWords [10]
          oneMaleWords[9]
     };
 
-const char* sectorsNames [3] [3]
+const char* tripletNames [3] [3]
 {
     {
      "рубль" ,
