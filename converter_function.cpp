@@ -2,22 +2,75 @@
 
 #include "words.h"
 
+static constexpr uint tripletNameByDigit[10]
+{
+    2,
+    0,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    2
+};
+
 std::string numToTxt(const int number)
 {
     uint digits[maxSize] {0};
-    Order orders[maxSize]
+    std::bitset<maxSize> teens;
+    uint size{ getDigitsCount(number)};
+    if( size > maxSize )
     {
-        one,
-        ten,
-        hundred,
-        one,
-        ten,
-        hundred,
-        one,
-        ten,
-        hundred
-    };
-    const char** masks[maxSize]
+        return "Число слишком большое";
+    }
+
+    int tmpNumber = std::abs(number);
+    for (uint i = 0; tmpNumber != 0; ++i)
+    {
+        digits[i] = tmpNumber % 10;
+        if( isTeen(digits[i], i) )
+        {
+            teens.set(i-1);
+            digits[i] = 0;
+        }
+        tmpNumber /= 10;
+    }
+
+    std::stringstream stream;
+    insertSign(stream, number);
+    for (int i = size-1; i >= 0; --i)
+    {
+        insertDigit(stream, digits[i], i, teens.test(i));
+        if( isEndOfTriplet(i) )
+        {
+            insertTripletName(stream, digits, i, teens.test(i));
+        }
+    }
+    insertNull(stream, number);
+    insertCurrency(stream , digits[0], teens.test(0));
+
+    return stream.str();
+}
+
+void insertWithSpace(std::stringstream &stream, const char *word)
+{
+    stream << word;
+    if ( word != nullptr && *word != '\0' )
+    {
+        stream << ' ';
+    }
+}
+
+void insertSign(std::stringstream &stream, const int number)
+{
+    insertWithSpace(stream, signWords[number >= 0]);
+}
+
+void insertDigit(std::stringstream& stream, const uint digit, const uint position, const bool isTeen)
+{
+    static const char** defaultDigits[maxSize]
     {
         oneMaleWords,
         tenMaleWords,
@@ -29,47 +82,35 @@ std::string numToTxt(const int number)
         tenMaleWords,
         hundredMaleWords
     };
-    std::bitset<maxSize> visibility;
-    bool isNegative{ number < 0 };
-    bool isNull{ !number };
+    insertWithSpace(stream, *((isTeen ? teenMaleWords : defaultDigits[position]) + digit));
+}
 
-    uint size{ getDigitsCount(number) + !number };
-    if( size > maxSize )
+void insertTripletName(std::stringstream& stream, const uint* digits, const uint position, const bool isTeen)
+{
+    if( tripletIsEmpty(digits, position, isTeen) )
     {
-        return "Число слишком большое";
+        return;
     }
-
-    int tmpNumber = std::abs(number);
-    for (uint i = 0; tmpNumber != 0; ++i)
+    static const char** defaultTriplets [3]
     {
-        digits[i] = tmpNumber % 10;
-        visibility[i] = digits[i];
-        if( isTeen(digits[i], orders[i]) )
-        {
-            masks[i-1] = teenMaleWords;
-            orders[i-1] = teen;
-            visibility[i-1] = true;
-            visibility[i] = false;
-        }
-        tmpNumber /= 10;
-    }
-    visibility[0] = visibility[0] || isNull;
+        onesTriplet,
+        thousandsTriplet,
+        millionsTriplet
+    };
+    const char** thisTriplet{ *(defaultTriplets + tripletPosition(position)) };
+    const char* tripletName{ *(thisTriplet + (isTeen ? 2 : tripletNameByDigit[digits[position]])) };
+    insertWithSpace(stream, tripletName);
+}
 
-    std::stringstream stream;
-    stream << sign[isNegative];
-    for (int i = size-1; i >= 0; --i)
-    {
-        if( visibility[i] )
-        {
-            stream << toChar(digits[i], masks[i]) << ' ';
-        }
-        if( needTripletName(orders[i], i, visibility) )
-        {
-            stream << getTripletName(digits[i], i, orders[i]) << ' ';
-        }
-    }
+void insertNull(std::stringstream &stream, const int number)
+{
+    insertWithSpace(stream, nullWords[static_cast<bool>(number)]);
+}
 
-    return stream.str();
+void insertCurrency(std::stringstream &stream, const uint digit, const bool isTeen)
+{
+    const char** currency{ rublesWords };
+    stream << *(currency + (isTeen ? 2 : tripletNameByDigit[digit]));
 }
 
 uint getDigitsCount(int number)
@@ -77,49 +118,23 @@ uint getDigitsCount(int number)
     return static_cast<uint>(std::ceil(std::log10(std::abs(number) + 1)));
 }
 
-bool isTeen(const uint digit, const Order order)
+bool isTeen(const uint digit, const uint posInNumber)
 {
-    return digit == 1 && order == ten;
+    static constexpr std::bitset<maxSize> teensMask{ 0b010'010'010 };
+    return digit == 1 && teensMask.test(posInNumber);
 }
 
-const char* toChar(const uint digit, const char** mask)
+bool tripletIsEmpty(const uint *digits, const uint position, const bool isTeen)
 {
-    return *(mask + digit);
+    return !(digits[position] + digits[position+1] + digits[position+2] + isTeen);
 }
 
-bool needTripletName(const Order order, const uint posInNumber, const std::bitset<maxSize>& visibility)
+uint tripletPosition(const uint position)
 {
-    if( order && order != teen )
-    {
-        return false;
-    }
-    return visibility[posInNumber] || visibility[posInNumber+1] || visibility[posInNumber+2];
+    return static_cast<uint>(position / tripletSize);
 }
 
-const char* getTripletName(const uint digit, const uint posInNumber, const Order order)
+bool isEndOfTriplet(const uint position)
 {
-    static const uint tripletNameByDigit[10]
-    {
-        2,
-        0,
-        1,
-        1,
-        1,
-        2,
-        2,
-        2,
-        2,
-        2
-    };
-    const char** nameMask{ *(tripletNames + tripletNumber(posInNumber)) };
-    if( order )
-    {
-        return nameMask[2];
-    }
-    return *(nameMask + tripletNameByDigit[digit]);
-}
-
-uint tripletNumber(const uint posInNumber)
-{
-    return static_cast<uint>(posInNumber/3);
+    return !(position % tripletSize);
 }
