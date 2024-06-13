@@ -8,9 +8,6 @@
 
 using uint = unsigned int;
 
-constexpr uint maxSize{ 9 };
-constexpr uint tripletSize{ 3 };
-
 std::string numToTxt(const int number);
 
 void insertSign(std::stringstream& stream, const int number);

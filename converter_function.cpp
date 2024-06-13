@@ -2,26 +2,12 @@
 
 #include "words.h"
 
-static constexpr uint tripletNameByDigit[10]
-{
-    2,
-    0,
-    1,
-    1,
-    1,
-    2,
-    2,
-    2,
-    2,
-    2
-};
-
 std::string numToTxt(const int number)
 {
-    uint digits[maxSize] {0};
-    std::bitset<maxSize> teens;
+    uint digits[maxNumberSize] {0};
+    std::bitset<maxNumberSize> teens;
     uint size{ getDigitsCount(number)};
-    if( size > maxSize )
+    if( size > maxNumberSize )
     {
         return "Число слишком большое";
     }
@@ -70,18 +56,6 @@ void insertSign(std::stringstream &stream, const int number)
 
 void insertDigit(std::stringstream& stream, const uint digit, const uint position, const bool isTeen)
 {
-    static const char** defaultDigits[maxSize]
-    {
-        oneMaleWords,
-        tenMaleWords,
-        hundredMaleWords,
-        oneFemaleWords,
-        tenMaleWords,
-        hundredMaleWords,
-        oneMaleWords,
-        tenMaleWords,
-        hundredMaleWords
-    };
     insertWithSpace(stream, *((isTeen ? teenMaleWords : defaultDigits[position]) + digit));
 }
 
@@ -91,12 +65,6 @@ void insertTripletName(std::stringstream& stream, const uint* digits, const uint
     {
         return;
     }
-    static const char** defaultTriplets [3]
-    {
-        onesTriplet,
-        thousandsTriplet,
-        millionsTriplet
-    };
     const char** thisTriplet{ *(defaultTriplets + tripletPosition(position)) };
     const char* tripletName{ *(thisTriplet + (isTeen ? 2 : tripletNameByDigit[digits[position]])) };
     insertWithSpace(stream, tripletName);
@@ -120,8 +88,7 @@ uint getDigitsCount(int number)
 
 bool isTeen(const uint digit, const uint posInNumber)
 {
-    static constexpr std::bitset<maxSize> teensMask{ 0b010'010'010 };
-    return digit == 1 && teensMask.test(posInNumber);
+    return digit == 1 && teensPositions.test(posInNumber);
 }
 
 bool tripletIsEmpty(const uint *digits, const uint position, const bool isTeen)

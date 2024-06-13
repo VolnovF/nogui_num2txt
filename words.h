@@ -1,7 +1,14 @@
 #ifndef WORDS_H
 #define WORDS_H
 
-static constexpr char* signWords [2]
+#include <bitset>
+
+constexpr int maxNumberSize{ 9 };
+constexpr int tripletSize{ 3 };
+constexpr int countDigitVariants{ 10 };
+constexpr int countTripletVariants{ 3 };
+
+constexpr char* signWords [2]
 {
     "минус",
     ""
@@ -13,7 +20,7 @@ const char* nullWords [2]
     ""
 };
 
-const char* oneMaleWords [10]
+const char* oneMaleWords [countDigitVariants]
 {
     ""      ,
     "один"  ,
@@ -26,7 +33,7 @@ const char* oneMaleWords [10]
     "восемь",
     "девять"
 };
-const char* tenMaleWords [10]
+const char* tenMaleWords [countDigitVariants]
 {
     ""           ,
     "десять"     ,
@@ -39,7 +46,7 @@ const char* tenMaleWords [10]
     "восемьдесят",
     "девяносто"
 };
-const char* hundredMaleWords [10]
+const char* hundredMaleWords [countDigitVariants]
 {
     ""         ,
     "сто"      ,
@@ -52,7 +59,7 @@ const char* hundredMaleWords [10]
     "восемьсот",
     "девятьсот"
 };
-const char* teenMaleWords [10]
+const char* teenMaleWords [countDigitVariants]
 {
     "десять"        ,
     "одиннадцать"   ,
@@ -65,7 +72,7 @@ const char* teenMaleWords [10]
     "восемнадцать"  ,
     "девятнадцать"
 };
-const char* oneFemaleWords [10]
+const char* oneFemaleWords [countDigitVariants]
 {
     oneMaleWords[0],
     "одна"         ,
@@ -79,30 +86,66 @@ const char* oneFemaleWords [10]
     oneMaleWords[9]
 };
 
-const char* onesTriplet [3]
+const char** defaultDigits [maxNumberSize]
+{
+    oneMaleWords,
+    tenMaleWords,
+    hundredMaleWords,
+    oneFemaleWords,
+    tenMaleWords,
+    hundredMaleWords,
+    oneMaleWords,
+    tenMaleWords,
+    hundredMaleWords
+};
+
+constexpr std::bitset<maxNumberSize> teensPositions{ 0b010'010'010 };
+
+const char* onesTriplet [countTripletVariants]
 {
     "",
     "",
     ""
 };
-const char* thousandsTriplet [3]
+const char* thousandsTriplet [countTripletVariants]
 {
     "тысяча",
     "тысячи",
     "тысяч"
 };
-const char* millionsTriplet [3]
+const char* millionsTriplet [countTripletVariants]
 {
     "миллион"  ,
     "миллиона" ,
     "миллионов"
 };
 
-const char* rublesWords [3]
+const char* rublesWords [countTripletVariants]
 {
     "рубль" ,
     "рубля" ,
     "рублей"
+};
+
+const char** defaultTriplets [tripletSize]
+{
+    onesTriplet,
+    thousandsTriplet,
+    millionsTriplet
+};
+
+constexpr int tripletNameByDigit [countDigitVariants]
+{
+    2,
+    0,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    2
 };
 
 #endif // WORDS_H
